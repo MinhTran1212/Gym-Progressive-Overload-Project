@@ -11,49 +11,64 @@ import {
 import { ExercisesService } from './exercises.service';
 import { CreateExerciseDto } from './dto/create-exercise.dto';
 import { UpdateExerciseDto } from './dto/update-exercise.dto';
+import { CurrentUser } from '../auth/current-user.decorator';
+import type { AuthUser } from '../auth/current-user.decorator';
 
 @Controller('exercises')
 export class ExercisesController {
-  constructor(private readonly exercisesService: ExercisesService) { }
+  constructor(private readonly exercisesService: ExercisesService) {}
 
   @Post()
   create(
-    @Body() createExerciseDto: CreateExerciseDto
+    @CurrentUser() user: AuthUser,
+    @Body() createExerciseDto: CreateExerciseDto,
   ) {
-    return this.exercisesService.create(createExerciseDto);
+    return this.exercisesService.create(createExerciseDto, user?.id);
   }
 
   @Get()
-  findAll() {
-    return this.exercisesService.findAll();
+  findAll(@CurrentUser() user: AuthUser) {
+    return this.exercisesService.findAll(user?.id);
   }
 
   @Get('muscle/:muscleGroup')
   findByMuscle(
-    @Param('muscleGroup') muscle: string
+    @Param('muscleGroup') muscle: string,
+    @CurrentUser() user: AuthUser,
   ) {
-    return this.exercisesService.findByMuscle(muscle);
+    return this.exercisesService.findByMuscle(muscle, user?.id);
+  }
+
+  @Get(':id/progression')
+  getProgression(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.exercisesService.getProgression(id, user?.id);
   }
 
   @Get(':id')
   findOne(
-    @Param('id', ParseUUIDPipe) id: string
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthUser,
   ) {
-    return this.exercisesService.findOne(id);
+    return this.exercisesService.findOne(id, user?.id);
   }
 
   @Patch(':id')
   updateOne(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateExerciseDto: UpdateExerciseDto,
+    @CurrentUser() user: AuthUser,
   ) {
-    return this.exercisesService.updateOne(id, updateExerciseDto);
+    return this.exercisesService.updateOne(id, updateExerciseDto, user?.id);
   }
 
   @Delete(':id')
   deleteOne(
-    @Param('id', ParseUUIDPipe) id: string
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthUser,
   ) {
-    return this.exercisesService.deleteOne(id);
+    return this.exercisesService.deleteOne(id, user?.id);
   }
 }
